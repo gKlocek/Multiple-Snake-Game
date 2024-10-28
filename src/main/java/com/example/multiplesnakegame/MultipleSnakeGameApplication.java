@@ -27,6 +27,7 @@ public class MultipleSnakeGameApplication {
 		@PostMapping("/data")
 		public String receiveData(@RequestBody String data) {
 			// Process your data here
+			System.out.println("Response: "+ data);
 			return "Received: " + data;
 		}
 	}
