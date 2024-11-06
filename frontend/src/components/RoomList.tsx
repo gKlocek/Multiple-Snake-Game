@@ -15,6 +15,7 @@ const RoomList: React.FC = () => {
         const response = await fetch('http://localhost:8080/api/rooms');
         if (response.ok) {
           const data = await response.json();
+          console.log("Fetched rooms: " + JSON.stringify(data));
           setRooms(data);
         } else {
           console.error('Failed to fetch rooms');
@@ -26,27 +27,30 @@ const RoomList: React.FC = () => {
   
     // Handle adding a new room
     const addRoom = async () => {
-    //   if (!newRoomName.trim()) return;
+      if (!newRoomName.trim()) return;
   
-    //   try {
-    //     const response = await fetch('http://localhost:8080/api/rooms', {
-    //       method: 'POST',
-    //       headers: {
-    //         'Content-Type': 'application/json',
-    //       },
-    //       body: JSON.stringify({ name: newRoomName }),
-    //     });
+      try {
+        const response = await fetch('http://localhost:8080/api/rooms', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ name: newRoomName }),
+        });
   
-    //     if (response.ok) {
-    //       const newRoom = await response.json();
-    //       setRooms((prevRooms) => [...prevRooms, newRoom]);
-    //       setNewRoomName(''); // Clear the input field
-    //     } else {
-    //       console.error('Failed to create room');
-    //     }
-    //   } catch (error) {
-    //     console.error('Error:', error);
-    //   }
+        if (response.ok) {
+          const newRoom = await response.json();
+          console.log("Adding new room: " + newRoom);
+          setRooms((prevRooms) => [...prevRooms, newRoom]);
+          setNewRoomName(''); // Clear the input field
+        } else {
+          console.error('Failed to create room');
+          const response_message = await response.json();
+          throw new Error(JSON.stringify(response_message));
+        }
+      } catch (error) {
+        console.error('Error:', error);
+      }
     };
   
     // Fetch rooms when the component mounts
@@ -59,9 +63,9 @@ const RoomList: React.FC = () => {
         <h1>Room List</h1>
         <ul>
             Here we list all the rooms
-          {/* {rooms.map((room) => (
+          {rooms.map((room) => (
             <li key={room.id}>{room.name}</li>
-          ))} */}
+          ))}
         </ul>
         <input
           type="text"

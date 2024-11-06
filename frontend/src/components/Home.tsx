@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 function Home() {
   // State to store the input value and the displayed name
@@ -6,6 +7,7 @@ function Home() {
   const [displayName, setDisplayName] = useState<string>('');
   const [responseMessage, setResponseMessage] = useState<string>('');
 
+  const navigate = useNavigate();
   // Function to handle the change in the input field
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setName(event.target.value);
@@ -28,6 +30,7 @@ function Home() {
       if (response.ok) {
         const result = await response.text();
         setResponseMessage(result);
+        navigate('/rooms'); // Navigate to RoomList after response
       } else {
         setResponseMessage('Failed to send data');
       }
