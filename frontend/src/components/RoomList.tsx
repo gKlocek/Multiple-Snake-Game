@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 interface Room {
     id: string;
@@ -9,6 +10,8 @@ const RoomList: React.FC = () => {
     const [rooms, setRooms] = useState<Room[]>([]);
     const [newRoomName, setNewRoomName] = useState<string>('');
   
+    const navigate = useNavigate();
+
     // Fetch rooms from the backend
     const fetchRooms = async () => {
       try {
@@ -53,6 +56,29 @@ const RoomList: React.FC = () => {
       }
     };
   
+  // Function to handle room click that loads game
+  const handleRoomClick = async (name: String) => {
+    try {
+      const response = await fetch('http://localhost:8080/api/game', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(name),
+      });
+
+      if (response.ok) {
+        // const result = await response.text();
+        navigate('/game'); // Navigate to RoomList after response
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
+    
+    // console.log(`Response message: ${JSON.stringify(responseMessage)}}`)
+  };
+
+
     // Fetch rooms when the component mounts
     useEffect(() => {
       fetchRooms();
@@ -64,7 +90,9 @@ const RoomList: React.FC = () => {
         <ul>
             Here we list all the rooms
           {rooms.map((room) => (
-            <li key={room.id}>{room.name}</li>
+            <li key={room.id}>
+              <button onClick={() => handleRoomClick(room.name)}>{room.name}</button>
+            </li>
           ))}
         </ul>
         <input

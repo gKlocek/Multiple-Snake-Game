@@ -37,6 +37,13 @@ public class MultipleSnakeGameApplication {
 			System.out.println("Room name: "+ data);
 			return data;
 		}
+
+		@PostMapping("/game")
+		public String choseRoom(@RequestBody String data) {
+			// Process your data here
+			System.out.println("Chosen game name: "+ data);
+			return data;
+		}
 	}
 
 	public static void main(String[] args) {
