@@ -14,7 +14,33 @@ const Game: React.FC = () => {
     const [snake, setSnake] = useState<Position[]>([{ x: 0, y: 0 }]); // Initial snake position
     const [food, setFood] = useState<Position>({ x: 100, y: 100 });   // Initial food position
     const [direction, setDirection] = useState<Position>({ x: SNAKE_SIZE, y: 0 });
+    const [gameOver, setGameOver] = useState<boolean>(false); // Game over state
 
+    // Correct position if out of bounds
+    const correctPosition = (position: Position) => {
+        const newPosition : Position = { x: position.x, y: position.y };
+        if (position.x < 0)
+            newPosition.x = BOARD_SIZE + position.x;
+        if (position.y < 0)
+            newPosition.y = BOARD_SIZE + position.y;
+        if (position.x >= BOARD_SIZE)
+            newPosition.x = position.x - BOARD_SIZE;
+        if (position.y >= BOARD_SIZE)
+            newPosition.y = position.y - BOARD_SIZE;
+
+        return newPosition;
+    }
+
+    // // check end game criteria
+    // const checkEndGame = (snake : Position[]) => {
+    //     return snake.slice(1).includes(snake[0]);
+    // }
+
+    // Check if the game is over
+    const checkEndGame = (snake: Position[]) => {
+        const [head, ...body] = snake;
+        return body.some(segment => segment.x === head.x && segment.y === head.y); // Head collides with body
+    };
     // Draw the game on the canvas
     const drawGame = () => {
         const canvas = canvasRef.current;
@@ -40,10 +66,18 @@ const Game: React.FC = () => {
         setSnake(prevSnake => {
             const newSnake = [...prevSnake];
             const head = { x: newSnake[0].x + direction.x, y: newSnake[0].y + direction.y };
+
             newSnake.unshift(head);  // Add new head to the front
 
+            // handle snake went out of bounds
+            for (var i =0;i<newSnake.length;i++) {
+                var segment = newSnake[i];
+                var corrected : Position = correctPosition(segment);
+                if (corrected === segment) break; else newSnake[i] = corrected;
+            }
+
             // Check if the snake eats food
-            if (head.x === food.x && head.y === food.y) {
+            if (newSnake[0].x === food.x && newSnake[0].y === food.y) {
                 setFood({
                     x: Math.floor((Math.random() * BOARD_SIZE) / SNAKE_SIZE) * SNAKE_SIZE,
                     y: Math.floor((Math.random() * BOARD_SIZE) / SNAKE_SIZE) * SNAKE_SIZE,
@@ -51,6 +85,13 @@ const Game: React.FC = () => {
             } else {
                 newSnake.pop(); // Remove the last segment if no food eaten
             }
+
+            // Check if the game is over
+            if (checkEndGame(newSnake)) {
+                setGameOver(true);
+                return prevSnake; // Return previous state to stop movement
+            }
+
             return newSnake;
         });
     };
@@ -75,6 +116,7 @@ const Game: React.FC = () => {
 
     // Game loop
     useEffect(() => {
+        if (gameOver) return; // Stop game loop when game is over
         const interval = setInterval(() => {
             moveSnake();
             drawGame();
@@ -102,6 +144,32 @@ const Game: React.FC = () => {
                     margin: "auto"
                 }}
             />
+
+{gameOver && (
+                <div style={{
+                    position: "fixed",
+                    top: "50%",
+                    left: "50%",
+                    transform: "translate(-50%, -50%)",
+                    backgroundColor: "white",
+                    padding: "20px",
+                    border: "1px solid black",
+                    boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.5)",
+                    zIndex: 1000,
+                }}>
+                    <h2>Game Over</h2>
+                    <button
+                        onClick={() => {
+                            setSnake([{ x: 0, y: 0 }]); // Reset snake
+                            setFood({ x: 100, y: 100 }); // Reset food
+                            setDirection({ x: SNAKE_SIZE, y: 0 }); // Reset direction
+                            setGameOver(false); // Restart the game
+                        }}
+                    >
+                        Restart
+                    </button>
+                </div>
+            )}
         </div>
     );
 };
